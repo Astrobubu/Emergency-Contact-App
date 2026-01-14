@@ -246,6 +246,8 @@ class _SettingsTile extends StatelessWidget {
       ),
       child: ListTile(
         onTap: onTap,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4), // Added explicit padding
+        dense: false, // Ensure consistent height
         leading: Container(
           width: 42,
           height: 42,
@@ -253,17 +255,21 @@ class _SettingsTile extends StatelessWidget {
             color: AppColors.surfaceVariant,
             borderRadius: BorderRadius.circular(AppTheme.radiusSm),
           ),
-          child: Icon(icon, color: AppColors.primary),
+          alignment: Alignment.center, // Center icon
+          child: Icon(icon, color: AppColors.primary, size: 22),
         ),
         title: Text(
           title,
           style: const TextStyle(
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
+            fontSize: 15,
           ),
         ),
         subtitle: Text(
           subtitle,
+          maxLines: 1, // Prevent overflow
+          overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             color: AppColors.textSecondary,
             fontSize: 13,
@@ -273,7 +279,7 @@ class _SettingsTile extends StatelessWidget {
             const Icon(
               Iconsax.arrow_right_3,
               color: AppColors.textMuted,
-              size: 20,
+              size: 18,
             ),
       ),
     )

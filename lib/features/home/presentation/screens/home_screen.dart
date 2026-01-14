@@ -95,7 +95,7 @@ class HomeScreen extends ConsumerWidget {
               ],
             ),
 
-            // Emergency Button (Static & Clean)
+            // Emergency Button (Bigger & Clearer)
             SliverToBoxAdapter(
               child: Center(
                 child: Padding(
@@ -103,29 +103,32 @@ class HomeScreen extends ConsumerWidget {
                   child: GestureDetector(
                     onTap: () => context.push(RouteNames.emergencyTrigger),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      width: double.infinity,
+                      margin: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd),
+                      padding: const EdgeInsets.symmetric(vertical: 18), // Bigger vertical padding
                       decoration: BoxDecoration(
                         color: AppColors.error,
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusLg), // Rounded pill
                         boxShadow: [
                           BoxShadow(
                             color: AppColors.error.withValues(alpha: 0.3),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
                           ),
                         ],
                       ),
                       child: Row(
-                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: const [
-                          Icon(Iconsax.warning_2, color: Colors.white, size: 20),
-                          SizedBox(width: 8),
+                          Icon(Iconsax.warning_2, color: Colors.white, size: 28), // Bigger icon
+                          SizedBox(width: 12),
                           Text(
-                            'Emergency SOS',
+                            'EMERGENCY SOS', // Uppercase for impact
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                              fontSize: 18, // Bigger text
+                              letterSpacing: 1.0,
                             ),
                           ),
                         ],
@@ -136,116 +139,148 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
 
-            // Family Members (Dynamic)
+            // Family Members (Dynamic - Split Layout)
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd, vertical: AppTheme.spaceSm),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Family Members',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    Icon(Icons.push_pin, size: 18, color: AppColors.textMuted),
-                  ],
+                padding: const EdgeInsets.fromLTRB(AppTheme.spaceMd, AppTheme.spaceSm, AppTheme.spaceMd, AppTheme.spaceSm),
+                child: const Text(
+                  'My Family',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
             ),
             SliverToBoxAdapter(
-              child: SizedBox(
-                height: 130, // Increased height for larger pinned items
-                child: familyAsync.when(
-                  loading: () => ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd),
-                    itemCount: 4,
-                    itemBuilder: (context, index) => _buildShimmerAvatar(),
-                  ),
-                  error: (_, __) => const Center(child: Text('Failed to load family')),
-                  data: (members) => ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd),
-                    itemCount: members.length + 1, // +1 for Add button
-                    itemBuilder: (context, index) {
-                      if (index == members.length) {
-                        return Center(child: _buildAddMemberButton(context));
-                      }
-                      final member = members[index];
-                      // Pinned logic: First 2 members are pinned and BIGGER
-                      final isPinned = index < 2;
-                      final size = isPinned ? 80.0 : 64.0; // Bigger if pinned
+              child: familyAsync.when(
+                loading: () => const SizedBox(height: 100, child: Center(child: CircularProgressIndicator())),
+                error: (_, __) => const SizedBox(),
+                data: (members) {
+                  final pinnedMembers = members.take(2).toList(); // First 2 are pinned
+                  final otherMembers = members.skip(2).toList();
 
-                      return Padding(
-                        padding: const EdgeInsets.only(right: AppTheme.spaceSm),
-                        child: GestureDetector(
-                          onTap: () => context.push('/family/member/${member.id}'),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center, // Center vertically
-                            children: [
-                              Stack(
-                                alignment: Alignment.bottomRight,
-                                children: [
-                                  Container(
-                                    width: size,
-                                    height: size,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primaryContainer,
-                                      shape: BoxShape.circle,
-                                      // Optional shadow only for pinned to make them pop more? 
-                                      // User said "pinning makes their icon bigger", kept it simple.
-                                    ),
-                                    child: Icon(Iconsax.user, color: AppColors.primary, size: size * 0.4),
-                                  ),
-                                  if (isPinned)
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Row 1: Pinned (Large)
+                      if (pinnedMembers.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd, vertical: 8),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround, // Distribute evenly
+                            children: pinnedMembers.map((member) {
+                              return GestureDetector(
+                                onTap: () => context.push('/family/member/${member.id}'),
+                                child: Column(
+                                  children: [
                                     Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: const BoxDecoration(
-                                        color: AppColors.surface,
+                                      width: 80, // Large
+                                      height: 80,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primaryContainer,
                                         shape: BoxShape.circle,
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.black12,
-                                            blurRadius: 4,
-                                          )
-                                        ]
+                                            color: AppColors.shadow.withValues(alpha: 0.5),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
                                       ),
-                                      child: const Icon(Icons.push_pin, size: 14, color: AppColors.primary),
+                                      child: const Icon(Iconsax.user, color: AppColors.primary, size: 36),
                                     ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                member.name,
-                                style: TextStyle(
-                                  fontSize: isPinned ? 14 : 13,
-                                  fontWeight: isPinned ? FontWeight.bold : FontWeight.w600,
-                                  color: AppColors.textPrimary,
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      member.name,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    // Status pill instead of pin icon
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.success.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Text(
+                                        'Safe',
+                                        style: TextStyle(fontSize: 10, color: AppColors.success, fontWeight: FontWeight.w600),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ],
+                              );
+                            }).toList(),
                           ),
                         ),
-                      );
-                    },
-                  ),
-                ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      // Row 2: Others + Add Button (Horizontal List)
+                      SizedBox(
+                        height: 90,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd),
+                          itemCount: otherMembers.length + 1,
+                          itemBuilder: (context, index) {
+                            if (index == otherMembers.length) {
+                              return Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: _buildAddMemberButton(context),
+                                ),
+                              );
+                            }
+                            final member = otherMembers[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 16),
+                              child: GestureDetector(
+                                onTap: () => context.push('/family/member/${member.id}'),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      width: 56, // Smaller
+                                      height: 56,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.surface,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: AppColors.border),
+                                      ),
+                                      child: const Icon(Iconsax.user, color: AppColors.textSecondary, size: 24),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      member.name,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
 
-            // Notifications / Coming Up (Dynamic)
+            // Notifications / Coming Up
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppTheme.spaceMd,
-                  AppTheme.spaceMd,
-                  AppTheme.spaceMd,
-                  AppTheme.spaceSm,
-                ),
+                padding: const EdgeInsets.fromLTRB(AppTheme.spaceMd, AppTheme.spaceMd, AppTheme.spaceMd, AppTheme.spaceSm),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -258,7 +293,8 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ),
                     TextButton(
-                      onPressed: () {},
+                      // Wired up to navigate even if empty
+                      onPressed: () => context.push(RouteNames.medicalHub), 
                       child: const Text('See all'),
                     ),
                   ],
@@ -267,7 +303,7 @@ class HomeScreen extends ConsumerWidget {
             ),
             SliverToBoxAdapter(
               child: SizedBox(
-                height: 90, // Increased height to prevent cutoff (was 80)
+                height: 100, // Increased from 90 to 100
                 child: notificationsAsync.when(
                   loading: () => ListView.builder(
                     scrollDirection: Axis.horizontal,

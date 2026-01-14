@@ -29,9 +29,14 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Contacts'),
+        centerTitle: true,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: AppColors.background,
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
         actions: [
           IconButton(
-            icon: const Icon(Iconsax.add_circle),
+            icon: const Icon(Iconsax.add_circle, color: AppColors.primary),
             onPressed: () {
               // TODO: Navigate to add contact
             },
