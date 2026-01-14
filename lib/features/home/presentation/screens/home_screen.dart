@@ -8,8 +8,8 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/route_names.dart';
 import '../../../../shared/widgets/buttons/emergency_button.dart';
 import '../../../../shared/widgets/cards/app_card.dart';
-import '../../family/data/family_repository.dart';
-import '../../notifications/data/notification_repository.dart';
+import 'package:family_emergency_hub/features/family/data/family_repository.dart';
+import 'package:family_emergency_hub/features/notifications/data/notification_repository.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -48,21 +48,15 @@ class HomeScreen extends ConsumerWidget {
               elevation: 0,
               title: Row(
                 children: [
+                  // User Avatar - Subtle (Icon only or minimal bg)
                   Container(
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
+                      color: AppColors.primary.withValues(alpha: 0.1), // Subtle tint
                       shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.shadow,
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
                     ),
-                    child: const Icon(Iconsax.user, color: AppColors.primary),
+                    child: const Icon(Iconsax.user, color: AppColors.primary, size: 20),
                   ),
                   const SizedBox(width: 12),
                   const Column(
@@ -88,19 +82,9 @@ class HomeScreen extends ConsumerWidget {
                 ],
               ),
               actions: [
+                // Notification Icon - Subtle
                 Container(
                   margin: const EdgeInsets.only(right: AppTheme.spaceMd),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.shadow,
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
                   child: IconButton(
                     icon: const Icon(Iconsax.notification, color: AppColors.textPrimary),
                     onPressed: () {
@@ -111,17 +95,43 @@ class HomeScreen extends ConsumerWidget {
               ],
             ),
 
-            // Emergency Button
+            // Emergency Button (Static & Clean)
             SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppTheme.spaceMd,
-                  AppTheme.spaceSm,
-                  AppTheme.spaceMd,
-                  AppTheme.spaceSm,
-                ),
-                child: EmergencyButton(
-                  onPressed: () => context.push(RouteNames.emergencyTrigger),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceMd),
+                  child: GestureDetector(
+                    onTap: () => context.push(RouteNames.emergencyTrigger),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: AppColors.error,
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.error.withValues(alpha: 0.3),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(Iconsax.warning_2, color: Colors.white, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            'Emergency SOS',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -141,14 +151,14 @@ class HomeScreen extends ConsumerWidget {
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    Icon(Iconsax.push_pin, size: 18, color: AppColors.textMuted),
+                    Icon(Icons.push_pin, size: 18, color: AppColors.textMuted),
                   ],
                 ),
               ),
             ),
             SliverToBoxAdapter(
               child: SizedBox(
-                height: 110,
+                height: 130, // Increased height for larger pinned items
                 child: familyAsync.when(
                   loading: () => ListView.builder(
                     scrollDirection: Axis.horizontal,
@@ -163,57 +173,57 @@ class HomeScreen extends ConsumerWidget {
                     itemCount: members.length + 1, // +1 for Add button
                     itemBuilder: (context, index) {
                       if (index == members.length) {
-                        return _buildAddMemberButton(context);
+                        return Center(child: _buildAddMemberButton(context));
                       }
                       final member = members[index];
-                      // Mock pinning first 2
+                      // Pinned logic: First 2 members are pinned and BIGGER
                       final isPinned = index < 2;
+                      final size = isPinned ? 80.0 : 64.0; // Bigger if pinned
 
                       return Padding(
                         padding: const EdgeInsets.only(right: AppTheme.spaceSm),
                         child: GestureDetector(
                           onTap: () => context.push('/family/member/${member.id}'),
                           child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center, // Center vertically
                             children: [
                               Stack(
+                                alignment: Alignment.bottomRight,
                                 children: [
                                   Container(
-                                    width: 64,
-                                    height: 64,
+                                    width: size,
+                                    height: size,
                                     decoration: BoxDecoration(
                                       color: AppColors.primaryContainer,
                                       shape: BoxShape.circle,
-                                      boxShadow: isPinned ? [
-                                        BoxShadow(
-                                          color: AppColors.primary.withValues(alpha: 0.3),
-                                          blurRadius: 10,
-                                          offset: const Offset(0, 4),
-                                        ) 
-                                      ] : null,
+                                      // Optional shadow only for pinned to make them pop more? 
+                                      // User said "pinning makes their icon bigger", kept it simple.
                                     ),
-                                    child: const Icon(Iconsax.user, color: AppColors.primary, size: 28),
+                                    child: Icon(Iconsax.user, color: AppColors.primary, size: size * 0.4),
                                   ),
                                   if (isPinned)
-                                    Positioned(
-                                      bottom: 0,
-                                      right: 0,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(4),
-                                        decoration: const BoxDecoration(
-                                          color: AppColors.surface,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(Iconsax.push_pin, size: 10, color: AppColors.primary),
+                                    Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: const BoxDecoration(
+                                        color: AppColors.surface,
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black12,
+                                            blurRadius: 4,
+                                          )
+                                        ]
                                       ),
+                                      child: const Icon(Icons.push_pin, size: 14, color: AppColors.primary),
                                     ),
                                 ],
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 member.name,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
+                                style: TextStyle(
+                                  fontSize: isPinned ? 14 : 13,
+                                  fontWeight: isPinned ? FontWeight.bold : FontWeight.w600,
                                   color: AppColors.textPrimary,
                                 ),
                               ),
@@ -257,7 +267,7 @@ class HomeScreen extends ConsumerWidget {
             ),
             SliverToBoxAdapter(
               child: SizedBox(
-                height: 80,
+                height: 90, // Increased height to prevent cutoff (was 80)
                 child: notificationsAsync.when(
                   loading: () => ListView.builder(
                     scrollDirection: Axis.horizontal,
@@ -268,7 +278,7 @@ class HomeScreen extends ConsumerWidget {
                   error: (_, __) => const SizedBox(),
                   data: (notifications) => ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd),
+                    padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd, vertical: 4), // Added vertical padding
                     itemCount: notifications.length,
                     itemBuilder: (context, index) {
                       final notif = notifications[index];

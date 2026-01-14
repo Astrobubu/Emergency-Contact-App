@@ -63,8 +63,6 @@ dependencies:
   flutter_hooks: ^0.20.5
   hooks_riverpod: ^2.6.1
   iconsax: ^0.0.8
-  firebase_core: ^4.3.0
-  firebase_messaging: ^16.1.0
   flutter_background_service: ^5.1.0
 
 dev_dependencies:
