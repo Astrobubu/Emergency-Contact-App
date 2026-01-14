@@ -8,12 +8,17 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/router/route_names.dart';
 import '../../../../shared/widgets/buttons/emergency_button.dart';
 import '../../../../shared/widgets/cards/app_card.dart';
+import '../../family/data/family_repository.dart';
+import '../../notifications/data/notification_repository.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final familyAsync = ref.watch(familyMembersProvider);
+    final notificationsAsync = ref.watch(upcomingNotificationsProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: ShaderMask(
@@ -34,12 +39,12 @@ class HomeScreen extends ConsumerWidget {
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
-            // Floating App Bar with Notification Icon
+            // Floating App Bar
             SliverAppBar(
               floating: true,
-              pinned: false, // Allow it to scroll away/fade
+              pinned: false,
               snap: true,
-              backgroundColor: Colors.transparent, // Transparent to blend/fade
+              backgroundColor: Colors.transparent,
               elevation: 0,
               title: Row(
                 children: [
@@ -121,7 +126,7 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
 
-            // Family Members (Top Priority)
+            // Family Members (Dynamic)
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd, vertical: AppTheme.spaceSm),
@@ -136,106 +141,93 @@ class HomeScreen extends ConsumerWidget {
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    Icon(Iconsax.push_pin, size: 18, color: AppColors.textMuted), // Pinned indicator
+                    Icon(Iconsax.push_pin, size: 18, color: AppColors.textMuted),
                   ],
                 ),
               ),
             ),
             SliverToBoxAdapter(
               child: SizedBox(
-                height: 110, // Increased height for better interaction
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd),
-                  itemCount: 5,
-                  itemBuilder: (context, index) {
-                    final members = ['Mom', 'Dad', 'Sarah', 'Mike', 'Add'];
-                    final memberIds = ['1', '2', '3', '4', ''];
-                    final isAdd = index == 4;
-                    // Mock pinning first 2 members
-                    final isPinned = index < 2;
+                height: 110,
+                child: familyAsync.when(
+                  loading: () => ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd),
+                    itemCount: 4,
+                    itemBuilder: (context, index) => _buildShimmerAvatar(),
+                  ),
+                  error: (_, __) => const Center(child: Text('Failed to load family')),
+                  data: (members) => ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd),
+                    itemCount: members.length + 1, // +1 for Add button
+                    itemBuilder: (context, index) {
+                      if (index == members.length) {
+                        return _buildAddMemberButton(context);
+                      }
+                      final member = members[index];
+                      // Mock pinning first 2
+                      final isPinned = index < 2;
 
-                    return Padding(
-                      padding: const EdgeInsets.only(right: AppTheme.spaceSm),
-                      child: GestureDetector(
-                        onTap: () {
-                          if (isAdd) {
-                            context.push('/family/add');
-                          } else {
-                            context.push('/family/member/${memberIds[index]}');
-                          }
-                        },
-                        child: Column(
-                          children: [
-                            Stack(
-                              children: [
-                                Container(
-                                  width: 64,
-                                  height: 64,
-                                  decoration: BoxDecoration(
-                                    color: isAdd
-                                        ? AppColors.surfaceVariant
-                                        : AppColors.primaryContainer,
-                                    shape: BoxShape.circle,
-                                    border: isAdd
-                                        ? Border.all(
-                                            color: AppColors.border,
-                                            width: 2,
-                                            strokeAlign: BorderSide.strokeAlignOutside,
-                                          )
-                                        : null,
-                                    boxShadow: isPinned ? [
-                                      BoxShadow(
-                                        color: AppColors.primary.withValues(alpha: 0.3),
-                                        blurRadius: 10,
-                                        offset: const Offset(0, 4),
-                                      ) 
-                                    ] : null,
-                                  ),
-                                  child: Icon(
-                                    isAdd ? Iconsax.add : Iconsax.user,
-                                    color: isAdd
-                                        ? AppColors.textMuted
-                                        : AppColors.primary,
-                                    size: isAdd ? 28 : 28,
-                                  ),
-                                ),
-                                if (isPinned && !isAdd)
-                                  Positioned(
-                                    bottom: 0,
-                                    right: 0,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: const BoxDecoration(
-                                        color: AppColors.surface,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(Iconsax.push_pin, size: 10, color: AppColors.primary),
+                      return Padding(
+                        padding: const EdgeInsets.only(right: AppTheme.spaceSm),
+                        child: GestureDetector(
+                          onTap: () => context.push('/family/member/${member.id}'),
+                          child: Column(
+                            children: [
+                              Stack(
+                                children: [
+                                  Container(
+                                    width: 64,
+                                    height: 64,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primaryContainer,
+                                      shape: BoxShape.circle,
+                                      boxShadow: isPinned ? [
+                                        BoxShadow(
+                                          color: AppColors.primary.withValues(alpha: 0.3),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 4),
+                                        ) 
+                                      ] : null,
                                     ),
+                                    child: const Icon(Iconsax.user, color: AppColors.primary, size: 28),
                                   ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              members[index],
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: isAdd
-                                    ? AppColors.textMuted
-                                    : AppColors.textPrimary,
+                                  if (isPinned)
+                                    Positioned(
+                                      bottom: 0,
+                                      right: 0,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: const BoxDecoration(
+                                          color: AppColors.surface,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(Iconsax.push_pin, size: 10, color: AppColors.primary),
+                                      ),
+                                    ),
+                                ],
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 8),
+                              Text(
+                                member.name,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
 
-            // Notifications / Coming Up (Middle)
+            // Notifications / Coming Up (Dynamic)
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(
@@ -265,34 +257,39 @@ class HomeScreen extends ConsumerWidget {
             ),
             SliverToBoxAdapter(
               child: SizedBox(
-                height: 80, // Slightly more compact
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd),
-                  children: const [
-                    _NotificationCard(
-                      icon: Iconsax.calendar,
-                      title: 'Dr. Johnson Checkup',
-                      subtitle: 'Dad • Tomorrow 2:30 PM',
-                      color: AppColors.warning,
-                    ),
-                    _NotificationCard(
-                      icon: Iconsax.shield_tick,
-                      title: 'Insurance Expiring',
-                      subtitle: 'Mom • Dec 25, 2025',
-                      color: AppColors.error,
-                    ),
-                  ],
+                height: 80,
+                child: notificationsAsync.when(
+                  loading: () => ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd),
+                    itemCount: 3,
+                    itemBuilder: (context, index) => _buildShimmerNotification(),
+                  ),
+                  error: (_, __) => const SizedBox(),
+                  data: (notifications) => ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd),
+                    itemCount: notifications.length,
+                    itemBuilder: (context, index) {
+                      final notif = notifications[index];
+                      return _NotificationCard(
+                        icon: notif.icon,
+                        title: notif.title,
+                        subtitle: notif.subtitle,
+                        color: notif.color,
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
 
-            // Quick Actions (Moved to Bottom)
+            // Quick Actions
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(
                   AppTheme.spaceMd,
-                  AppTheme.spaceXl, // Extra space before Quick Actions
+                  AppTheme.spaceXl,
                   AppTheme.spaceMd,
                   AppTheme.spaceSm,
                 ),
@@ -313,7 +310,7 @@ class HomeScreen extends ConsumerWidget {
                   crossAxisCount: 2,
                   mainAxisSpacing: AppTheme.spaceSm,
                   crossAxisSpacing: AppTheme.spaceSm,
-                  childAspectRatio: 1.4, // Slightly wider
+                  childAspectRatio: 1.4,
                 ),
                 delegate: SliverChildListDelegate([
                   QuickActionCard(
@@ -341,6 +338,102 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildAddMemberButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: AppTheme.spaceSm),
+      child: GestureDetector(
+        onTap: () => context.push('/family/add'),
+        child: Column(
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceVariant,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.border,
+                  width: 2,
+                  strokeAlign: BorderSide.strokeAlignOutside,
+                ),
+              ),
+              child: const Icon(Iconsax.add, color: AppColors.textMuted, size: 28),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Add',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textMuted,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerAvatar() {
+    return Padding(
+      padding: const EdgeInsets.only(right: AppTheme.spaceSm),
+      child: Column(
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: const BoxDecoration(
+              color: Color(0xFFEEEEEE),
+              shape: BoxShape.circle,
+            ),
+          ).animate(onPlay: (c) => c.repeat()).shimmer(duration: 1200.ms, color: Colors.white),
+          const SizedBox(height: 8),
+          Container(
+            width: 40,
+            height: 10,
+            color: const Color(0xFFEEEEEE),
+          ).animate(onPlay: (c) => c.repeat()).shimmer(duration: 1200.ms, color: Colors.white),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShimmerNotification() {
+    return Container(
+      width: 200,
+      margin: const EdgeInsets.only(right: AppTheme.spaceSm),
+      padding: const EdgeInsets.all(AppTheme.spaceSm),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: const Color(0xFFEEEEEE),
+              borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+            ),
+          ),
+          const SizedBox(width: AppTheme.spaceSm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(width: 80, height: 10, color: const Color(0xFFEEEEEE)),
+                const SizedBox(height: 4),
+                Container(width: 120, height: 10, color: const Color(0xFFEEEEEE)),
+              ],
+            ),
+          ),
+        ],
+      ).animate(onPlay: (c) => c.repeat()).shimmer(duration: 1200.ms, color: Colors.white),
     );
   }
 }
