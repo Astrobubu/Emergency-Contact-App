@@ -11,6 +11,7 @@ class AppCard extends StatefulWidget {
   final EdgeInsetsGeometry? margin;
   final Color? backgroundColor;
   final double? elevation;
+  final Color? shadowColor; // Added for flexible styling
   final double borderRadius;
   final bool hasBorder;
 
@@ -22,6 +23,7 @@ class AppCard extends StatefulWidget {
     this.margin,
     this.backgroundColor,
     this.elevation,
+    this.shadowColor,
     this.borderRadius = AppTheme.radiusLg,
     this.hasBorder = false,
   });
@@ -86,7 +88,7 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
             : null,
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow,
+            color: widget.shadowColor ?? AppColors.shadow,
             blurRadius: widget.elevation ?? AppTheme.elevationSm,
             offset: const Offset(0, 2),
           ),

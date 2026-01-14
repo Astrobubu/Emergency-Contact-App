@@ -96,44 +96,32 @@ class HomeScreen extends ConsumerWidget {
             ),
 
             // Emergency Button (Bigger & Clearer)
+            // Emergency Button (Bigger & Clearer)
             SliverToBoxAdapter(
               child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceMd),
-                  child: GestureDetector(
-                    onTap: () => context.push(RouteNames.emergencyTrigger),
-                    child: Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd),
-                      padding: const EdgeInsets.symmetric(vertical: 18), // Bigger vertical padding
-                      decoration: BoxDecoration(
-                        color: AppColors.error,
-                        borderRadius: BorderRadius.circular(AppTheme.radiusLg), // Rounded pill
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.error.withValues(alpha: 0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
+                child: AppCard(
+                  onTap: () => context.push(RouteNames.emergencyTrigger),
+                  margin: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd, vertical: AppTheme.spaceMd),
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  backgroundColor: AppColors.error,
+                  shadowColor: AppColors.error.withValues(alpha: 0.3),
+                  elevation: 12,
+                  borderRadius: AppTheme.radiusLg,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Iconsax.warning_2, color: Colors.white, size: 28),
+                      SizedBox(width: 12),
+                      Text(
+                        'EMERGENCY SOS',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          letterSpacing: 1.0,
+                        ),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(Iconsax.warning_2, color: Colors.white, size: 28), // Bigger icon
-                          SizedBox(width: 12),
-                          Text(
-                            'EMERGENCY SOS', // Uppercase for impact
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18, // Bigger text
-                              letterSpacing: 1.0,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    ],
                   ),
                 ),
               ),
@@ -169,52 +157,42 @@ class HomeScreen extends ConsumerWidget {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd, vertical: 8),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround, // Distribute evenly
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: pinnedMembers.map((member) {
-                              return GestureDetector(
-                                onTap: () => context.push('/family/member/${member.id}'),
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      width: 80, // Large
-                                      height: 80,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.primaryContainer,
-                                        shape: BoxShape.circle,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: AppColors.shadow.withValues(alpha: 0.5),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 4),
-                                          ),
-                                        ],
-                                      ),
-                                      child: const Icon(Iconsax.user, color: AppColors.primary, size: 36),
+                              return Column(
+                                children: [
+                                  AppCard(
+                                    onTap: () => context.push('/family/member/${member.id}'),
+                                    padding: const EdgeInsets.all(20), // Padding creates size (36 icon + 20*2 = 76 approx)
+                                    margin: EdgeInsets.zero,
+                                    borderRadius: 999, // Circle
+                                    backgroundColor: AppColors.primaryContainer,
+                                    shadowColor: AppColors.shadow.withValues(alpha: 0.5),
+                                    elevation: 6,
+                                    child: const Icon(Iconsax.user, color: AppColors.primary, size: 36),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    member.name,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textPrimary,
                                     ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      member.name,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.textPrimary,
-                                      ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.success.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
-                                    const SizedBox(height: 4),
-                                    // Status pill instead of pin icon
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.success.withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: const Text(
-                                        'Safe',
-                                        style: TextStyle(fontSize: 10, color: AppColors.success, fontWeight: FontWeight.w600),
-                                      ),
+                                    child: const Text(
+                                      'Safe',
+                                      style: TextStyle(fontSize: 10, color: AppColors.success, fontWeight: FontWeight.w600),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               );
                             }).toList(),
                           ),
@@ -224,16 +202,16 @@ class HomeScreen extends ConsumerWidget {
                       
                       // Row 2: Others + Add Button (Horizontal List)
                       SizedBox(
-                        height: 90,
+                        height: 100, // Slightly taller to accommodate shadows
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd),
+                          padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd, vertical: 4),
                           itemCount: otherMembers.length + 1,
                           itemBuilder: (context, index) {
                             if (index == otherMembers.length) {
                               return Center(
                                 child: Padding(
-                                  padding: const EdgeInsets.only(left: 8.0),
+                                  padding: const EdgeInsets.only(left: 8.0, bottom: 20), // Align with text
                                   child: _buildAddMemberButton(context),
                                 ),
                               );
@@ -241,31 +219,27 @@ class HomeScreen extends ConsumerWidget {
                             final member = otherMembers[index];
                             return Padding(
                               padding: const EdgeInsets.only(right: 16),
-                              child: GestureDetector(
-                                onTap: () => context.push('/family/member/${member.id}'),
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      width: 56, // Smaller
-                                      height: 56,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.surface,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: AppColors.border),
-                                      ),
-                                      child: const Icon(Iconsax.user, color: AppColors.textSecondary, size: 24),
+                              child: Column(
+                                children: [
+                                  AppCard(
+                                    onTap: () => context.push('/family/member/${member.id}'),
+                                    padding: const EdgeInsets.all(14), // Smaller padding for smaller size
+                                    margin: EdgeInsets.zero,
+                                    borderRadius: 999,
+                                    backgroundColor: AppColors.surface,
+                                    elevation: 2,
+                                    child: const Icon(Iconsax.user, color: AppColors.textSecondary, size: 24),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    member.name,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.textSecondary,
                                     ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      member.name,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                        color: AppColors.textSecondary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             );
                           },

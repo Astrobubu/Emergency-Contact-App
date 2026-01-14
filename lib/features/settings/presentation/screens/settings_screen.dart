@@ -231,23 +231,13 @@ class _SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AppCard(
+      onTap: onTap,
+      padding: EdgeInsets.zero, // Let ListTile handle internal padding if needed, or just layout
       margin: const EdgeInsets.only(bottom: AppTheme.spaceXs),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
       child: ListTile(
-        onTap: onTap,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4), // Added explicit padding
-        dense: false, // Ensure consistent height
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        dense: false,
         leading: Container(
           width: 42,
           height: 42,
@@ -255,7 +245,7 @@ class _SettingsTile extends StatelessWidget {
             color: AppColors.surfaceVariant,
             borderRadius: BorderRadius.circular(AppTheme.radiusSm),
           ),
-          alignment: Alignment.center, // Center icon
+          alignment: Alignment.center,
           child: Icon(icon, color: AppColors.primary, size: 22),
         ),
         title: Text(
@@ -268,7 +258,7 @@ class _SettingsTile extends StatelessWidget {
         ),
         subtitle: Text(
           subtitle,
-          maxLines: 1, // Prevent overflow
+          maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             color: AppColors.textSecondary,
@@ -283,12 +273,12 @@ class _SettingsTile extends StatelessWidget {
             ),
       ),
     )
-        .animate(delay: Duration(milliseconds: 100 + (index * 50)))
-        .slideX(
-          begin: 0.2,
-          end: 0,
-          duration: AppAnimations.medium,
-          curve: AppAnimations.slideIn,
-        );
+    .animate(delay: Duration(milliseconds: 100 + (index * 50)))
+    .slideX(
+      begin: 0.2,
+      end: 0,
+      duration: AppAnimations.medium,
+      curve: AppAnimations.slideIn,
+    );
   }
 }
