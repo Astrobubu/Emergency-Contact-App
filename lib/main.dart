@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'core/config/supabase_config.dart';
+import 'core/services/location_service.dart';
 import 'app.dart';
 
 void main() async {
@@ -30,6 +31,9 @@ void main() async {
 
   // Initialize Supabase
   await SupabaseConfig.initialize();
+
+  // Initialize Location Service (Background configuration)
+  await LocationService().initialize();
 
   runApp(
     const ProviderScope(

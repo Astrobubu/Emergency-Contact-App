@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/animations/app_animations.dart';
 import '../../../../shared/widgets/cards/app_card.dart';
+import '../../../../core/router/route_names.dart';
 
 class MedicalHubScreen extends ConsumerWidget {
   const MedicalHubScreen({super.key});
@@ -33,7 +34,36 @@ class MedicalHubScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(AppTheme.spaceMd),
         children: [
-          // Categories - NO Emergency ID here (lock screen only)
+          // View Emergency ID Button (to preview/edit)
+          AppCard(
+            onTap: () => context.push(RouteNames.emergencyId),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(AppTheme.spaceSm),
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Iconsax.heart5, color: AppColors.error),
+                ),
+                const SizedBox(width: AppTheme.spaceMd),
+                const Expanded(
+                  child: Text(
+                    'View My Emergency ID',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                const Icon(Iconsax.arrow_right_3, size: 20, color: AppColors.textMuted),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppTheme.spaceMd),
+
+          // Categories
           Row(
             children: [
               Expanded(

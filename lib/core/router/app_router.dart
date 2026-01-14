@@ -15,6 +15,7 @@ import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/medical/presentation/screens/medical_hub_screen.dart';
 import '../../features/documents/presentation/screens/documents_vault_screen.dart';
 import '../../features/emergency/presentation/screens/emergency_trigger_screen.dart';
+import '../../features/medical/presentation/screens/emergency_id_screen.dart';
 import '../../shared/widgets/app_scaffold.dart';
 import 'route_names.dart';
 
@@ -122,6 +123,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => _buildSlideTransitionPage(
           key: state.pageKey,
           child: const DocumentsVaultScreen(),
+        ),
+      ),
+      GoRoute(
+        path: RouteNames.emergencyId,
+        name: 'emergencyId',
+        pageBuilder: (context, state) => _buildScaleTransitionPage(
+          key: state.pageKey,
+          child: EmergencyIdScreen(
+            memberId: 'current', // TODO: Get actual member ID
+          ),
         ),
       ),
 
